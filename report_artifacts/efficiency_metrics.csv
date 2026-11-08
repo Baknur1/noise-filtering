@@ -1,0 +1,10 @@
+condition,measure,n,mean,median,q1,q3
+baseline,latency_s,200,10.2195,8.355,6.315,11.805
+baseline,prompt_tokens,200,3561.875,3396.5,2964.5,4066.0
+baseline,chunks,200,10.0,10.0,10.0,10.0
+length_matched,latency_s,200,5.6716,4.165,3.11,6.75
+length_matched,prompt_tokens,200,1505.025,1437.5,1171.0,1747.25
+length_matched,chunks,200,4.0,4.0,4.0,4.0
+filtered,latency_s,200,7.0714,5.875,3.7,9.1425
+filtered,prompt_tokens,200,2091.45,2063.0,993.5,3069.0
+filtered,chunks,200,5.66,6.0,3.0,9.0

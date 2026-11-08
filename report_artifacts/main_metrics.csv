@@ -1,0 +1,16 @@
+condition,metric,n_valid,mean,ci95_low,ci95_high
+baseline,hallucination_rate,200,0.83,0.775,0.88
+baseline,answer_correctness,200,0.57525,0.51825,0.629
+baseline,faithfulness,200,0.5865,0.5335,0.6375
+baseline,context_precision,200,0.59515,0.544597,0.64365
+baseline,context_recall,200,0.516,0.4635,0.5675
+length_matched,hallucination_rate,200,0.77,0.71,0.825
+length_matched,answer_correctness,200,0.5365,0.479,0.594
+length_matched,faithfulness,200,0.5945,0.54,0.6475
+length_matched,context_precision,200,0.54825,0.4955,0.599256
+length_matched,context_recall,200,0.50225,0.448,0.557
+filtered,hallucination_rate,200,0.765,0.705,0.825
+filtered,answer_correctness,200,0.5125,0.4525,0.572
+filtered,faithfulness,200,0.5355,0.477488,0.593
+filtered,context_precision,200,0.5215,0.4665,0.576
+filtered,context_recall,200,0.471,0.414988,0.527

@@ -1,0 +1,5 @@
+hypothesis,decision,rule,evidence
+H1,Not supported,Filtered hallucination rate decreases by at least 0.05 and Holm-adjusted McNemar p < 0.05,difference=-0.051852; p_holm=0.473877
+H2,Not supported,"Correctness difference > 0, CI excludes 0, and Holm-adjusted Wilcoxon p < 0.05","difference=-0.053704; CI=[-0.110741, 0.001481]; p_holm=0.471759"
+H3,Not supported,Filtered exceeds Top-4 control in correctness and faithfulness with adjusted p < 0.05,correctness_diff=-0.014815; correctness_p=1; faithfulness_diff=-0.055556; faithfulness_p=0.504941
+H4,Exploratory only,"No non-inferiority margin was frozen, so non-significance cannot prove evidence preservation","context_recall_diff=-0.048148; CI=[-0.100000, 0.000741]; p_holm=0.565485"

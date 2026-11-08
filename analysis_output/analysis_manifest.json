@@ -1,0 +1,36 @@
+{
+  "input_scores": "C:\\Projects\\RMT\\Assignment_4_improved_working\\scores.csv",
+  "input_rows": 405,
+  "unique_qids": 135,
+  "conditions": [
+    "baseline",
+    "length_matched",
+    "filtered"
+  ],
+  "pairs": [
+    [
+      "baseline",
+      "filtered"
+    ],
+    [
+      "length_matched",
+      "filtered"
+    ],
+    [
+      "baseline",
+      "length_matched"
+    ]
+  ],
+  "bootstrap_repetitions": 10000,
+  "bootstrap_seed": 42,
+  "holm_family_sizes": {
+    "confirmatory_primary_all_pairs": 6,
+    "sensitivity_hallucination_all_pairs": 3,
+    "secondary_metrics_all_pairs": 9
+  },
+  "notes": [
+    "Differences are condition_b minus condition_a.",
+    "Wilcoxon p-values use a normal approximation with tie correction and continuity correction.",
+    "H4 remains exploratory because the frozen protocol does not specify a non-inferiority margin."
+  ]
+}
