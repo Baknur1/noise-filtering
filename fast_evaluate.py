@@ -1,13 +1,3 @@
-"""Fast evaluation using Qwen 2.5 7B via Ollama native JSON mode.
-
-Replaces the 25-roundtrip sequential RAGAS loop with a single structured LLM judge pass per query.
-Judges all 4 metrics (faithfulness, answer_correctness, context_precision, context_recall)
-using qwen2.5:7b as frozen in Appendix A, running in ~1.2s per record (total ~12 minutes for 600 records).
-
-Usage:
-    python fast_evaluate.py runs/test.jsonl scores.csv [--judge qwen2.5:7b]
-"""
-
 import argparse
 import csv
 import json
