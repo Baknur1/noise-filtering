@@ -82,8 +82,7 @@ def evaluate_single(judge_model, question, answer, reference, contexts):
         r_val = round(max(0.0, min(1.0, float(data.get("context_recall", 1.0)))), 4)
         return {"faithfulness": f_val, "answer_correctness": c_val, "context_precision": p_val, "context_recall": r_val}
     except Exception as e:
-        # Fallback heuristic
-        return {"faithfulness": 1.0, "answer_correctness": 0.5, "context_precision": 0.5, "context_recall": 1.0}
+        raise RuntimeError(f"Judge evaluation failed; no synthetic fallback score was written: {e}") from e
 
 
 def main():
@@ -124,6 +123,7 @@ def main():
             )
             out = {"qid": r["qid"], "condition": r["condition"], **scores}
             writer.writerow(out)
+            done.add(key)
             f.flush()
             elapsed = round(time.time() - t0, 2)
             print(f"[{idx}/{total}] ({elapsed}s) {out}")

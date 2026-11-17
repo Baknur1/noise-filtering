@@ -1,5 +1,5 @@
 {
-  "input_scores": "C:\\Projects\\RMT\\Assignment_4_improved_working\\scores.csv",
+  "input_scores": "scores.csv",
   "input_rows": 405,
   "unique_qids": 135,
   "conditions": [

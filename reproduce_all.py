@@ -12,10 +12,19 @@ Features:
 """
 
 import argparse
+import csv
 import os
 import sys
 import subprocess
-import pandas as pd
+
+
+def read_csv(path):
+    with open(path, newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def lookup(rows, row_key, column_key, value_key):
+    return {(row[row_key], row[column_key]): float(row[value_key]) for row in rows}
 
 
 def print_box_table(title, headers, rows, alignments=None):
@@ -57,7 +66,7 @@ def main():
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     scores_path = os.path.join(base_dir, "scores.csv")
-    runs_path = os.path.join(base_dir, "runs", "test.jsonl")
+    runs_path = os.path.join(base_dir, "runs", "test_unique.jsonl")
     analysis_dir = os.path.join(base_dir, "analysis_output")
     artifacts_dir = os.path.join(base_dir, "report_artifacts")
 
@@ -65,10 +74,8 @@ def main():
     eff_csv = os.path.join(artifacts_dir, "efficiency_metrics.csv")
     hyp_csv = os.path.join(analysis_dir, "hypothesis_decisions.csv")
 
-    need_run = args.recompute or not (os.path.exists(main_csv) and os.path.exists(eff_csv) and os.path.exists(hyp_csv))
-
     # 1. Validation of raw inputs
-    for path, desc in [(scores_path, "scores.csv"), (runs_path, "runs/test.jsonl")]:
+    for path, desc in [(scores_path, "scores.csv"), (runs_path, "runs/test_unique.jsonl")]:
         if not os.path.exists(path):
             print(f"[ERROR] Required input file missing: {desc} at '{path}'")
             sys.exit(1)
@@ -76,27 +83,25 @@ def main():
         print(f"[OK] Found {desc} ({size_kb:.1f} KB)")
     sys.stdout.flush()
 
-    # 2. Run analysis and artifact generation if needed
-    if need_run:
-        print("\n>>> Step 1/2: Computing paired non-parametric statistical tests...")
-        sys.stdout.flush()
-        cmd1 = [sys.executable, os.path.join(base_dir, "consolidated_analysis.py"), scores_path, analysis_dir]
-        res1 = subprocess.run(cmd1, capture_output=True, text=True)
-        if res1.returncode != 0:
-            print("[ERROR] consolidated_analysis.py failed:\n", res1.stderr)
-            sys.exit(res1.returncode)
-        print("[OK] Statistical analysis complete.")
+    # 2. Always recompute from the saved inputs. Existing outputs are never accepted
+    # merely because files with the expected names are present.
+    print("\n>>> Step 1/2: Computing paired non-parametric statistical tests...")
+    sys.stdout.flush()
+    cmd1 = [sys.executable, os.path.join(base_dir, "consolidated_analysis.py"), scores_path, analysis_dir]
+    res1 = subprocess.run(cmd1, capture_output=True, text=True)
+    if res1.returncode != 0:
+        print("[ERROR] consolidated_analysis.py failed:\n", res1.stderr)
+        sys.exit(res1.returncode)
+    print("[OK] Statistical analysis complete.")
 
-        print(">>> Step 2/2: Generating publication figures and artifact tables...")
-        sys.stdout.flush()
-        cmd2 = [sys.executable, os.path.join(base_dir, "generate_report_artifacts.py"), scores_path, runs_path, artifacts_dir]
-        res2 = subprocess.run(cmd2, capture_output=True, text=True)
-        if res2.returncode != 0:
-            print("[ERROR] generate_report_artifacts.py failed:\n", res2.stderr)
-            sys.exit(res2.returncode)
-        print("[OK] Figures and metrics tables generated.")
-    else:
-        print("[OK] Pre-computed evaluation logs and artifact tables verified.")
+    print(">>> Step 2/2: Generating publication figures and artifact tables...")
+    sys.stdout.flush()
+    cmd2 = [sys.executable, os.path.join(base_dir, "generate_report_artifacts.py"), scores_path, runs_path, artifacts_dir]
+    res2 = subprocess.run(cmd2, capture_output=True, text=True)
+    if res2.returncode != 0:
+        print("[ERROR] generate_report_artifacts.py failed:\n", res2.stderr)
+        sys.exit(res2.returncode)
+    print("[OK] Figures and metrics tables generated from unique paired records.")
 
     print("\n" + "=" * 80)
     print("  EMPIRICAL RESULTS SUMMARY (N = 135 paired queries, 405 evaluations)")
@@ -105,8 +110,8 @@ def main():
 
     # Table 1: Quality Metrics (Full Uncut Values)
     if os.path.exists(main_csv):
-        df_main = pd.read_csv(main_csv)
-        piv = df_main.pivot(index="metric", columns="condition", values="mean")
+        df_main = read_csv(main_csv)
+        piv = lookup(df_main, "metric", "condition", "mean")
         
         t1_rows = []
         metric_labels = [
@@ -117,10 +122,10 @@ def main():
             ("context_recall",     "Context Recall",     False),
         ]
         for metric_key, label, is_pct in metric_labels:
-            if metric_key in piv.index:
-                b_val = piv.loc[metric_key, "baseline"]
-                f_val = piv.loc[metric_key, "filtered"]
-                l_val = piv.loc[metric_key, "length_matched"]
+            if (metric_key, "baseline") in piv:
+                b_val = piv[(metric_key, "baseline")]
+                f_val = piv[(metric_key, "filtered")]
+                l_val = piv[(metric_key, "length_matched")]
                 if is_pct:
                     t1_rows.append([label, f"{b_val*100:.2f}%", f"{f_val*100:.2f}%", f"{l_val*100:.2f}%"])
                 else:
@@ -132,22 +137,22 @@ def main():
 
     # Table 2: Efficiency Metrics (Full Uncut Values)
     if os.path.exists(eff_csv):
-        df_eff = pd.read_csv(eff_csv)
-        piv_eff = df_eff.pivot(index="measure", columns="condition", values="mean")
+        df_eff = read_csv(eff_csv)
+        piv_eff = lookup(df_eff, "measure", "condition", "mean")
         
-        tok_b = piv_eff.loc['prompt_tokens', 'baseline']
-        tok_f = piv_eff.loc['prompt_tokens', 'filtered']
-        tok_l = piv_eff.loc['prompt_tokens', 'length_matched']
+        tok_b = piv_eff[('prompt_tokens', 'baseline')]
+        tok_f = piv_eff[('prompt_tokens', 'filtered')]
+        tok_l = piv_eff[('prompt_tokens', 'length_matched')]
         tok_pct = ((tok_f - tok_b) / tok_b) * 100
 
-        lat_b = piv_eff.loc['latency_s', 'baseline']
-        lat_f = piv_eff.loc['latency_s', 'filtered']
-        lat_l = piv_eff.loc['latency_s', 'length_matched']
+        lat_b = piv_eff[('latency_s', 'baseline')]
+        lat_f = piv_eff[('latency_s', 'filtered')]
+        lat_l = piv_eff[('latency_s', 'length_matched')]
         lat_pct = ((lat_f - lat_b) / lat_b) * 100
 
-        chk_b = piv_eff.loc['chunks', 'baseline']
-        chk_f = piv_eff.loc['chunks', 'filtered']
-        chk_l = piv_eff.loc['chunks', 'length_matched']
+        chk_b = piv_eff[('chunks', 'baseline')]
+        chk_f = piv_eff[('chunks', 'filtered')]
+        chk_l = piv_eff[('chunks', 'length_matched')]
 
         t2_rows = [
             ["Prompt Tokens",   f"{tok_b:,.0f}", f"{tok_f:,.0f} ({tok_pct:+.1f}%)", f"{tok_l:,.0f}"],
@@ -160,9 +165,9 @@ def main():
 
     # Table 3: Pre-Registered Hypotheses (100% Full Uncut Evidence String)
     if os.path.exists(hyp_csv):
-        df_hyp = pd.read_csv(hyp_csv)
+        df_hyp = read_csv(hyp_csv)
         t3_rows = []
-        for _, row in df_hyp.iterrows():
+        for row in df_hyp:
             hyp = str(row["hypothesis"])
             dec = str(row["decision"])
             ev = str(row["evidence"])  # FULL complete evidence string without any "..."
@@ -174,7 +179,8 @@ def main():
                         alignments=["<", "<", "<"])
 
     print("\n" + "=" * 80)
-    print("  [SUCCESS] REPRODUCIBILITY CHECK PASSED (100% Dynamically Verified)")
+    print("  [SUCCESS] SAVED-DATA REPRODUCTION PASSED")
+    print("  Scope: 135 unique paired questions; this does not rerun retrieval, generation, or judging.")
     print("  Publication Artifacts Saved:")
     print("    - report_artifacts/figure_1_main_metrics.png")
     print("    - report_artifacts/figure_2_latency_distribution.png")

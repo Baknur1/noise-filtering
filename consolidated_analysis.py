@@ -276,7 +276,7 @@ def main():
         writer.writerows(decisions)
 
     manifest = {
-        "input_scores": str(Path(args.scores).resolve()),
+        "input_scores": Path(args.scores).name,
         "input_rows": input_rows,
         "unique_qids": len(paired),
         "conditions": list(CONDITIONS),

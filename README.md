@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Reproducibility: 100% Traceable](https://img.shields.io/badge/Reproducibility-100%25%20Verified-brightgreen.svg)]()
+[![Reproducibility: Saved Data](https://img.shields.io/badge/Reproducibility-Saved--Data%20Checked-brightgreen.svg)]()
 [![Target Journal: IEEE Access](https://img.shields.io/badge/Target%20Journal-IEEE%20Access-orange.svg)](https://ieeeaccess.ieee.org)
 
 This repository contains the complete experimental framework, raw execution traces, evaluation records, statistical analysis, and manuscript dossier for the research article:  
@@ -10,23 +10,21 @@ This repository contains the complete experimental framework, raw execution trac
 
 - **Authors**: Baknur Aitimbet, Assylkhan Toilybekov, Ayaulym Zhaskairat  
 - **Course**: *Research Methods and Tools* (SE-2418, Astana IT University, 2026)  
-- **Target Journal**: *IEEE Access* (Scopus Q1, CiteScore 8.9)  
+- **Target Journal**: *IEEE Access* (Scopus indexed; 2025 CiteScore 9.3, checked 17 November 2026)  
 
 ---
 
 ## ⚡ 1-Click Reproducibility (Master Pipeline)
 
-To reproduce all tables (Quality & Efficiency), non-parametric statistical tests, and publication figures directly from the experimental logs in **under 1 second**:
+To recompute the saved-data tables, non-parametric statistical tests, and publication figures:
 
 ```bash
 python reproduce_all.py
 ```
 
-To force a fresh recomputation of all 10,000 bootstrap resamples and plots from scratch:
-
-```bash
-python reproduce_all.py --recompute
-```
+The script always recomputes outputs from `scores.csv` and the de-duplicated
+`runs/test_unique.jsonl`. It does **not** rerun retrieval, answer generation,
+or LLM judging.
 
 This master pipeline outputs:
 - **`report_artifacts/main_metrics.csv`**: Main quality metrics (Hallucination Rate, Faithfulness, Correctness, Precision, Recall) with 95% bootstrap confidence intervals.
@@ -54,12 +52,13 @@ The benchmark evaluates $N = 135$ paired questions from the **RAGBench TechQA** 
 
 | Condition | Hallucination Rate (HR) ↓ | Answer Correctness ↑ | Faithfulness ↑ | Prompt Tokens ↓ | Mean Latency (s) ↓ | Retained Chunks |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline (Top-10)** | **82.96%** | 0.5663 | 0.5830 | 3,561.88 | 10.22 s | 10.00 |
-| **Length-Matched (Top-4)** | **76.30%** | 0.5274 | 0.5844 | 1,505.03 | 5.67 s | 4.00 |
-| **Filtered (Proposed)** | **77.78%** | 0.5126 | 0.5289 | **2,091.45** | **7.07 s** | **5.66** |
+| **Baseline (Top-10)** | 82.96% | **0.5663** | 0.5830 | 3,576.06 | 10.73 s | 10.00 |
+| **Length-Matched (Top-4)** | **76.30%** | 0.5274 | **0.5844** | **1,514.07** | **5.68 s** | **4.00** |
+| **Filtered (Proposed)** | 77.78% | 0.5126 | 0.5289 | 2,090.85 | 7.13 s | 5.59 |
 
-- **Operational Efficiency**: Post-retrieval filtering saves **41.3% prompt tokens** and accelerates response time by **30.8%** ($p < 0.001$).
-- **Qualitative Error Analysis**: 35 manually annotated failure cases categorized into Retrieval Miss, Generator Hallucination, and Over-filtering in `error_analysis_completed.csv`.
+- **Quality**: the observed 5.19 percentage-point hallucination-rate decrease was not significant after Holm correction (adjusted p = 0.474). H1-H3 were not supported; H4 is exploratory.
+- **Operational Efficiency**: filtering reduced mean prompt tokens by **41.5%** and mean local generation latency by **33.5%** on 135 unique paired records (paired Wilcoxon p = 1.17e-11).
+- **Qualitative Error File**: `error_analysis_completed.csv` contains 35 condition-level rows from 14 questions. All rows have the same saved category, and the file does not contain independent categorical decisions required to verify Cohen's kappa.
 
 ---
 
@@ -74,16 +73,20 @@ The benchmark evaluates $N = 135$ paired questions from the **RAGBench TechQA** 
 ├── generate_report_artifacts.py# Generator for publication figures and CSV tables
 ├── scores.csv                  # 405 verified RAGAS evaluation scores
 ├── runs/
-│   └── test.jsonl              # 600 raw generation traces with prompt/gen tokens
+│   ├── test.jsonl              # Original raw log; contains repeated question IDs
+│   └── test_unique.jsonl       # 405 unique condition records (135 questions × 3)
 ├── report_artifacts/           # Final publication figures and summary tables
 │   ├── figure_1_main_metrics.png
 │   ├── figure_2_latency_distribution.png
 │   ├── main_metrics.csv
-│   └── efficiency_metrics.csv
+│   ├── efficiency_metrics.csv
+│   └── efficiency_comparisons.csv
 ├── analysis_output/            # Statistical test results and hypothesis decisions
 │   ├── statistical_comparisons.csv
 │   └── hypothesis_decisions.csv
-├── error_analysis_completed.csv# Qualitative error analysis (35 validated cases)
+├── submission/                 # Corrected manuscript, dossier, slides, and PDFs
+├── prepare_unique_runs.py      # Builds the paired de-duplicated runtime log
+├── error_analysis_completed.csv# Preliminary qualitative sample (35 rows)
 ├── Final.ipynb                  # Interactive GPU experiment runner for Google Colab
 ├── requirements.txt            # Python environment dependencies
 └── LICENSE                     # MIT Open-Source License
@@ -113,5 +116,5 @@ python reproduce_all.py
 
 ## 📜 Academic Integrity and Data Availability Statement
 
-All experimental data in `runs/test.jsonl` and scores in `scores.csv` are 100% reproducible and generated locally without proprietary black-box APIs. No private, confidential, or personally identifiable data is included.
+The repository preserves the original runtime log and adds a de-duplicated paired log for analysis. The saved-data reproduction was checked locally. Independent reproduction by another person, a fresh end-to-end model run, author approval, and a university similarity report are not claimed by the repository.
 Licensed under the [MIT License](LICENSE).

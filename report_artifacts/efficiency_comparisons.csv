@@ -1,0 +1,7 @@
+condition_a,condition_b,measure,n_pairs,mean_a,mean_b,difference_b_minus_a,percent_change,wilcoxon_w,z_approx,p_raw,n_nonzero
+baseline,filtered,latency_s,135,10.726222,7.128,-3.598222,-33.546035,1500.5,6.784269,1.166755581e-11,135
+baseline,filtered,prompt_tokens,135,3576.059259,2090.851852,-1485.207407,-41.531957,0,9.386086,0,117
+baseline,filtered,chunks,135,10.0,5.592593,-4.407407,-44.074074,0,9.406513,0,117
+length_matched,filtered,latency_s,135,5.678593,7.128,1.449407,25.52406,2777.5,3.874201,0.0001069752534,134
+length_matched,filtered,prompt_tokens,135,1514.066667,2090.851852,576.785185,38.095098,2376.5,4.860338,1.171856935e-06,135
+length_matched,filtered,chunks,135,4.0,5.592593,1.592593,39.814815,1823.0,5.229984,1.695244163e-07,125
